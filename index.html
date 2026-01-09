@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>modelo base</title>
+    <style>
+        body{
+            margin:0;
+            overflow: hidden;
+            font-family: Arial;
+        }
+        /*generamos el panel de usuario*/
+        #panel{
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background: rgba(rgb(255, 255, 255), rgb(0, 131, 0), rgb(255, 255, 255));
+            border-radius: 12px;
+            width: 200px;
+            color: rgb(255, 255, 255);
+        }
+        #panel label{
+            font-size: 16px;
+            margin-top: 5;
+        }
+        #panel input{
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #panel boton{
+            width: 100%;
+            margin-top: 5px;
+            padding: 6;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <!--generamos UI-->
+    <div id="panel">
+        <label>Proyecto</label>
+        <select id="projectSelect" style="width:100%; margin-bottom:8px;"></select>
+        <button id="loadProject" style="width:100%; margin-bottom:10px;">Cargar proyecto</button>
+        <!--panel para cambio de colores del cubo-->
+        <label>Color de cubos</label>
+        <input type="color" id="cuboColor" value="FFFFFF">
+        <!--panel para cambios de iluminación-->
+        <label>Luces</label>
+        <input type="range" id="pointLight" min="0" max="3" step="0.1" value="1">
+        <!--rotación animación-->
+        <labe>Animación</labe>
+        <button id="rotate">Desactivar/activar</button>
+    </div>
+
+    <!--librerias-->
+    <script src="js/three.min.js"></script>
+    <script src="js/GLTFLoader.js"></script> <!--correccion de mala escritura-->
+    <!--selector carga dinámica de proyecto -->
+    <script>
+        (function(){
+            var files = ["ar-first.js","arbolito.js","newmodel.js","parque.js","slime.js"];
+            var select = document.getElementById('projectSelect');
+            files.forEach(function(f){
+                var opt = document.createElement('option');
+                opt.value = f;
+                opt.textContent = f;
+                select.appendChild(opt);
+            });
+            if(files.indexOf('parque.js')!==-1) select.value = 'parque.js';
+
+            var currentDispose = null;
+
+            function loadProject(name){
+                if(typeof currentDispose === 'function'){
+                    try{ currentDispose(); }catch(e){ console.error('Error during dispose', e); }
+                    currentDispose = null;
+                }
+
+                var existing = document.getElementById('dynamicProject');
+                if(existing) existing.parentNode.removeChild(existing);
+
+                var s = document.createElement('script');
+                s.id = 'dynamicProject';
+                // cargar como módulo para apps que usan import (ajusta si añades más)
+                if(name === 'ar-first.js' || name === 'slime.js'){
+                    s.type = 'module';
+                }
+                s.src = 'apps/' + name;
+                s.async = false;
+                s.onload = function(){
+                    if(typeof window.appInit === 'function'){
+                        try{
+                            window.appInit();
+                            currentDispose = (typeof window.appDispose === 'function') ? window.appDispose : null;
+                        }catch(e){ console.error('appInit error', e); }
+                    } else {
+                        currentDispose = (typeof window.appDispose === 'function') ? window.appDispose : null;
+                    }
+                };
+                s.onerror = function(){ console.error('Failed to load', s.src); };
+                document.body.appendChild(s);
+            }
+
+            document.getElementById('loadProject').addEventListener('click', function(){
+                loadProject(select.value);
+            });
+
+            select.addEventListener('change', function(){ loadProject(this.value); });
+
+            loadProject(select.value);
+        })();
+    </script>
+</body>
+</html>
