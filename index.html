@@ -63,7 +63,7 @@
     <!--selector carga dinámica de proyecto -->
     <script>
         (function(){
-            var files = ["ar-first.js","arbolito.js","newmodel.js","parque.js","slime.js"];
+            var files = ["ar-final.js","arbolito.js","newmodel.js","parque.js","slime.js"];
             var select = document.getElementById('projectSelect');
             files.forEach(function(f){
                 var opt = document.createElement('option');
@@ -87,7 +87,7 @@
                 var s = document.createElement('script');
                 s.id = 'dynamicProject';
                 // cargar como módulo para apps que usan import (ajusta si añades más)
-                if(name === 'ar-first.js' || name === 'slime.js'){
+                if(name === 'ar-first.js' || name === 'slime.js' || name === 'ar-final.js'){
                     s.type = 'module';
                 }
                 s.src = 'apps/' + name;
