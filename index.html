@@ -8,34 +8,39 @@
         body{
             margin:0;
             overflow: hidden;
-            font-family: Arial;
+            font-family: Arial, Helvetica, sans-serif;
         }
-        /*generamos el panel de usuario*/
+        /* generamos el panel de usuario */
         #panel{
             position: absolute;
             top: 10px;
             left: 10px;
             padding: 10px;
-            background: rgba(rgb(255, 255, 255), rgb(0, 131, 0), rgb(255, 255, 255));
+            background: rgba(0, 131, 0, 0.65);
             border-radius: 12px;
-            width: 200px;
-            color: rgb(255, 255, 255);
+            width: 220px;
+            color: #ffffff;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.3);
         }
         #panel label{
-            font-size: 16px;
-            margin-top: 5;
+            font-size: 14px;
+            margin-top: 6px;
+            display: block;
         }
         #panel input{
             width: 100%;
             margin-bottom: 10px;
+            box-sizing: border-box;
         }
-        #panel boton{
+        #panel button{
             width: 100%;
             margin-top: 5px;
-            padding: 6;
+            padding: 6px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
         }
 
     </style>
@@ -48,18 +53,26 @@
         <button id="loadProject" style="width:100%; margin-bottom:10px;">Cargar proyecto</button>
         <!--panel para cambio de colores del cubo-->
         <label>Color de cubos</label>
-        <input type="color" id="cuboColor" value="FFFFFF">
+        <input type="color" id="cuboColor" value="#FFFFFF">
         <!--panel para cambios de iluminación-->
         <label>Luces</label>
         <input type="range" id="pointLight" min="0" max="3" step="0.1" value="1">
         <!--rotación animación-->
-        <labe>Animación</labe>
+        <label>Animación</label>
         <button id="rotate">Desactivar/activar</button>
     </div>
 
-    <!--librerias-->
-    <script src="js/three.min.js"></script>
-    <script src="js/GLTFLoader.js"></script> <!--correccion de mala escritura-->
+        <!--librerias-->
+        <script src="js/three.min.js"></script>
+        <script src="js/GLTFLoader.js"></script>
+        <!-- mapear import 'three' usado por módulos a la versión module local -->
+        <script type="importmap">
+        {
+            "imports": {
+                "three": "./js/three.module.js"
+            }
+        }
+        </script>
     <!--selector carga dinámica de proyecto -->
     <script>
         (function(){
@@ -76,6 +89,10 @@
             var currentDispose = null;
 
             function loadProject(name){
+                // sanitize name if accidentally contains multiple values (e.g. from weird paste)
+                if(typeof name === 'string'){
+                    name = name.split(',')[0].trim();
+                }
                 if(typeof currentDispose === 'function'){
                     try{ currentDispose(); }catch(e){ console.error('Error during dispose', e); }
                     currentDispose = null;
@@ -113,6 +130,35 @@
             select.addEventListener('change', function(){ loadProject(this.value); });
 
             loadProject(select.value);
+            
+            // UI bindings: call app-exposed functions if they exist
+            function applyUIToApp(){
+                var color = document.getElementById('cuboColor').value;
+                var intensity = parseFloat(document.getElementById('pointLight').value);
+                if(typeof window.setCubeColor === 'function') window.setCubeColor(color);
+                if(typeof window.setPointLightIntensity === 'function') window.setPointLightIntensity(intensity);
+            }
+
+            document.getElementById('cuboColor').addEventListener('input', function(e){
+                var v = e.target.value;
+                if(typeof window.setCubeColor === 'function') window.setCubeColor(v);
+            });
+
+            document.getElementById('pointLight').addEventListener('input', function(e){
+                var val = parseFloat(e.target.value);
+                if(typeof window.setPointLightIntensity === 'function') window.setPointLightIntensity(val);
+            });
+
+            var rotating = true;
+            document.getElementById('rotate').addEventListener('click', function(){
+                rotating = !rotating;
+                if(typeof window.setRotationEnabled === 'function'){
+                    window.setRotationEnabled(rotating);
+                } else if(typeof window.toggleRotation === 'function'){
+                    window.toggleRotation(rotating);
+                }
+                this.textContent = rotating ? 'Detener rotación' : 'Activar rotación';
+            });
         })();
     </script>
 </body>
