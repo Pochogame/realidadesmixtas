@@ -1,7 +1,7 @@
 // Convertido a módulo que expone appInit/appDispose (index loader cargará como module si corresponde)
-import * as THREE from '../js/three.module.js';
+import * as THREE from 'three';
 import { ARButton } from '../js/ARButton.js';
-import { GLTFLoader } from '../js/GLTFLoader.js';
+import { GLTFLoader } from 'https://unpkg.com/three@0.154.0/examples/jsm/loaders/GLTFLoader.js';
 
 let camera, scene, renderer;
 let controller;

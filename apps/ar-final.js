@@ -1,4 +1,4 @@
-import * as THREE from '../js/three.module.js';
+import * as THREE from 'three';
 import { ARButton } from '../js/ARButton.js';
 
 let camera, scene, renderer;
