@@ -9,6 +9,7 @@ let model;
 let hitTestSource = null;
 let hitTestSourceRequested = false;
 let resizeHandler = null;
+let arButtonElement = null;
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -74,7 +75,10 @@ window.appInit = function(){
     renderer.xr.enabled = true;
     document.body.appendChild(renderer.domElement);
 
-    document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
+    // ARButton.createButton already appends the element in its constructor —
+    // capture the returned element so we can remove it later on dispose.
+    arButtonElement = ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] });
+
 
     const hemi = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
     scene.add(hemi);
@@ -100,8 +104,7 @@ window.appDispose = function(){
         scene.traverse(function(obj){ if(obj.isMesh){ if(obj.geometry) try{obj.geometry.dispose();}catch(e){} if(obj.material) try{ if(Array.isArray(obj.material)) obj.material.forEach(m=>m.dispose()); else obj.material.dispose(); }catch(e){} } });
     }
     if(renderer && renderer.domElement && renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
-    // remove ARButton (it appends a button to body)
-    const btn = document.querySelector('.webxr-button');
-    if(btn && btn.parentNode) btn.parentNode.removeChild(btn);
+    // remove ARButton element if we created/captured it
+    try{ if(arButtonElement && arButtonElement.parentNode) arButtonElement.parentNode.removeChild(arButtonElement); }catch(e){}
     scene = null; camera = null; renderer = null; controller = null; model = null; hitTestSource = null; hitTestSourceRequested = false;
 };

@@ -17,45 +17,48 @@ class ARButton{
         
         if ( 'xr' in navigator ) {
 
-			const button = document.createElement( 'button' );
-			button.style.display = 'none';
+            const button = document.createElement( 'button' );
+            button.style.display = 'none';
             button.style.height = '40px';
 
-			navigator.xr.isSessionSupported( 'immersive-ar' ).then( ( supported ) => {
+            navigator.xr.isSessionSupported( 'immersive-ar' ).then( ( supported ) => {
 
-				supported ? this.showStartAR( button ) : this.showARNotSupported( button );
+                supported ? this.showStartAR( button ) : this.showARNotSupported( button );
 
-			} );
+            } );
             
+            // keep reference to created element so static helper can return it
+            this.button = button;
             document.body.appendChild( button );
 
-		} else {
+        } else {
 
-			const message = document.createElement( 'a' );
+            const message = document.createElement( 'a' );
 
-			if ( window.isSecureContext === false ) {
+            if ( window.isSecureContext === false ) {
 
-				message.href = document.location.href.replace( /^http:/, 'https:' );
-				message.innerHTML = 'WEBXR NEEDS HTTPS'; 
+                message.href = document.location.href.replace( /^http:/, 'https:' );
+                message.innerHTML = 'WEBXR NEEDS HTTPS'; 
 
-			} else {
+            } else {
 
-				message.href = 'https://immersiveweb.dev/';
-				message.innerHTML = 'WEBXR NOT AVAILABLE';
+                message.href = 'https://immersiveweb.dev/';
+                message.innerHTML = 'WEBXR NOT AVAILABLE';
 
-			}
+            }
 
-			message.style.left = '0px';
-			message.style.width = '100%';
-			message.style.textDecoration = 'none';
+            message.style.left = '0px';
+            message.style.width = '100%';
+            message.style.textDecoration = 'none';
 
-			this.stylizeElement( message, false );
+            this.stylizeElement( message, false );
             message.style.bottom = '0px';
             message.style.opacity = '1';
             
+            this.button = message;
             document.body.appendChild ( message );
 
-		}
+        }
 
     }
 
@@ -190,6 +193,12 @@ class ARButton{
 
 		
 
+};
+
+// static helper to match examples API
+ARButton.createButton = function( renderer, options ){
+    const inst = new ARButton( renderer, options );
+    return inst.button;
 };
 
 export { ARButton };
