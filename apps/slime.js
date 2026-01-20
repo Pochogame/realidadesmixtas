@@ -6,6 +6,8 @@ import { DRACOLoader } from 'https://unpkg.com/three@0.154.0/examples/jsm/loader
 
 let scene, camera, renderer, controls, mixer, clock;
 let resizeHandler = null;
+let rafId = null;
+let running = false;
 
 window.appInit = function(){
   scene = new THREE.Scene();
@@ -62,11 +64,13 @@ window.appInit = function(){
   };
   window.addEventListener('resize', resizeHandler);
 
+  running = true;
   animate();
 };
 
 function animate(){
-  requestAnimationFrame(animate);
+  if (!running) return;
+  rafId = requestAnimationFrame(animate);
   const delta = clock ? clock.getDelta() : 0;
   if (mixer) mixer.update(delta);
   if (controls) controls.update();
@@ -74,10 +78,13 @@ function animate(){
 }
 
 window.appDispose = function(){
-  try{ if(clock) clock = null; }catch(e){}
+  // stop animation loop first
+  running = false;
+  try{ if(rafId) cancelAnimationFrame(rafId); }catch(e){}
+  rafId = null;
   try{ if(controls) controls.dispose(); }catch(e){}
   if(resizeHandler){ window.removeEventListener('resize', resizeHandler); resizeHandler = null; }
   if(scene){ scene.traverse(function(obj){ if(obj.isMesh){ if(obj.geometry) try{obj.geometry.dispose();}catch(e){} if(obj.material) try{ if(Array.isArray(obj.material)) obj.material.forEach(m=>m.dispose()); else obj.material.dispose(); }catch(e){} } }); }
   if(renderer && renderer.domElement && renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
-  scene = camera = renderer = controls = mixer = null;
+  scene = camera = renderer = controls = mixer = clock = null;
 };
